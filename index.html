@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>第七章可视化平台 - 3D图表与动画学习网站</title>
-    <link rel="stylesheet" href="chapter7.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --primary-pink: #FF69B4;      /* 热情粉红 */
+            --light-pink: #FFB6C1;        /* 浅粉红 */
+            --pale-pink: #FFF5F5;         /* 豆沙粉白 */
+            --peach-pink: #FFDAB9;        /* 桃粉色 */
+            --coral-pink: #FF6B6B;        /* 珊瑚粉 */
+            --rose-pink: #FF1493;         /* 深粉红 */
+            --baby-pink: #F8BBD0;         /* 婴儿粉 */
+            --cotton-pink: #FFCCDD;       /* 棉花糖粉 */
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,9 +24,16 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #FFF5F5 0%, #F8BBD0 25%, #FFDAB9 50%, #FFCCDD 75%, #FFF0F5 100%);
-            min-height: 100vh;
+            background: linear-gradient(135deg, 
+                var(--pale-pink) 0%, 
+                var(--baby-pink) 25%, 
+                var(--peach-pink) 50%, 
+                var(--cotton-pink) 75%, 
+                #FFF0F5 100%);
+            background-attachment: fixed;
             color: #8B4513;
+            line-height: 1.6;
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
@@ -25,12 +41,17 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
             text-align: center;
             padding: 60px 40px;
-            background: linear-gradient(135deg, rgba(255,182,193,0.4) 0%, rgba(255,192,203,0.3) 100%);
+            background: linear-gradient(135deg, 
+                rgba(255,182,193,0.4) 0%, 
+                rgba(255,192,203,0.3) 100%);
             border-radius: 30px;
             margin-bottom: 50px;
             backdrop-filter: blur(20px);
@@ -45,7 +66,11 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #FF69B4, #FF1493, #FF6B6B, #FF69B4);
+            background: linear-gradient(90deg, 
+                var(--primary-pink), 
+                var(--rose-pink), 
+                var(--coral-pink), 
+                var(--primary-pink));
             background-size: 200% 100%;
             animation: slideGradient 3s ease-in-out infinite;
         }
@@ -58,7 +83,7 @@
 
         h1 {
             font-size: 3.5rem;
-            color: #FF1493;
+            color: var(--rose-pink);
             margin-bottom: 15px;
             text-shadow: 3px 3px 6px rgba(255,20,147,0.3);
             position: relative;
@@ -69,7 +94,7 @@
 
         .subtitle {
             font-size: 1.4rem;
-            color: #FF6B6B;
+            color: var(--coral-pink);
             opacity: 0.9;
             position: relative;
             z-index: 1;
@@ -84,10 +109,22 @@
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(255,182,193,0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .intro-section h2 {
-            color: #FF1493;
+            color: var(--rose-pink);
             font-size: 2rem;
             margin-bottom: 20px;
         }
@@ -105,6 +142,7 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-bottom: 50px;
+            flex: 1;
         }
 
         .feature-card {
@@ -116,12 +154,18 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 2px solid rgba(255,182,193,0.3);
             cursor: pointer;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
         }
+
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
 
         .feature-card:hover {
             transform: translateY(-10px) scale(1.05);
             box-shadow: 0 20px 50px rgba(255,182,193,0.25);
-            border-color: #FF69B4;
+            border-color: var(--primary-pink);
         }
 
         .feature-icon {
@@ -138,7 +182,7 @@
         }
 
         .feature-title {
-            color: #FF1493;
+            color: var(--rose-pink);
             font-size: 1.5rem;
             margin-bottom: 15px;
             font-weight: 600;
@@ -153,17 +197,37 @@
         .feature-button {
             display: inline-block;
             padding: 12px 30px;
-            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            background: linear-gradient(135deg, var(--primary-pink), var(--rose-pink));
             color: white;
             text-decoration: none;
             border-radius: 25px;
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(255,105,180,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .feature-button:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .feature-button:hover {
-            background: linear-gradient(135deg, #FF1493, #C71585);
+            background: linear-gradient(135deg, var(--rose-pink), var(--coral-pink));
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255,105,180,0.4);
         }
@@ -171,14 +235,18 @@
         .cta-section {
             text-align: center;
             padding: 60px 40px;
-            background: linear-gradient(135deg, rgba(255,182,193,0.3) 0%, rgba(255,218,185,0.2) 100%);
+            background: linear-gradient(135deg, 
+                rgba(255,182,193,0.3) 0%, 
+                rgba(255,218,185,0.2) 100%);
             border-radius: 25px;
             margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.8s;
+            animation-fill-mode: both;
         }
 
         .cta-title {
             font-size: 2.5rem;
-            color: #FF1493;
+            color: var(--rose-pink);
             margin-bottom: 20px;
             font-weight: 700;
         }
@@ -195,7 +263,7 @@
         .main-button {
             display: inline-block;
             padding: 15px 40px;
-            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            background: linear-gradient(135deg, var(--primary-pink), var(--rose-pink));
             color: white;
             text-decoration: none;
             border-radius: 30px;
@@ -235,7 +303,7 @@
             padding: 40px 20px;
             background: rgba(255,255,255,0.6);
             border-radius: 20px;
-            margin-top: 40px;
+            margin-top: auto;
         }
 
         .footer-content {
@@ -258,7 +326,7 @@
         }
 
         .footer-link {
-            color: #FF1493;
+            color: var(--rose-pink);
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 15px;
@@ -320,21 +388,21 @@
             <div class="feature-card" onclick="window.location.href='chapter7.html'">
                 <span class="feature-icon">🌟</span>
                 <h3 class="feature-title">mplot3d绘制3D图表</h3>
-                <p class="feature-description">探索3D散点图、曲面图和网格图的创建方法，掌握空间数据可视化的核心技术。</p>
+                <p class="feature-description">探索3D散点图、线框图和曲面图的创建方法，掌握空间数据可视化的核心技术。支持交互式旋转和参数调整。</p>
                 <a href="chapter7.html" class="feature-button">开始学习</a>
             </div>
 
             <div class="feature-card" onclick="window.location.href='chapter7.html'">
                 <span class="feature-icon">✨</span>
                 <h3 class="feature-title">animation制作动图</h3>
-                <p class="feature-description">学习使用matplotlib的动画功能，创建闪烁星星、正弦波等动态可视化效果。</p>
+                <p class="feature-description">学习使用matplotlib的动画功能，创建闪烁星星、正弦波和旋转动画等动态可视化效果。</p>
                 <a href="chapter7.html" class="feature-button">开始学习</a>
             </div>
 
             <div class="feature-card" onclick="window.location.href='chapter7.html'">
                 <span class="feature-icon">🗺️</span>
                 <h3 class="feature-title">basemap绘制统计地图</h3>
-                <p class="feature-description">掌握地理数据可视化技巧，创建气泡图、热力图和分级统计图等地图类型。</p>
+                <p class="feature-description">掌握地理数据可视化技巧，创建气泡地图、散点地图等地图类型，支持美国城市人口分布分析。</p>
                 <a href="chapter7.html" class="feature-button">开始学习</a>
             </div>
         </section>
@@ -361,28 +429,26 @@
     </div>
 
     <script>
-        // 添加页面加载动画
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.feature-card, .intro-section, .cta-section');
-            elements.forEach((element, index) => {
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(30px)';
-                element.style.transition = 'all 0.6s ease';
-                
-                setTimeout(() => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-        });
-
         // 添加滚动视差效果
         window.addEventListener('scroll', function() {
             const scrolled = window.pageYOffset;
-            const parallax = document.querySelector('header');
-            if (parallax) {
-                parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+            const header = document.querySelector('header');
+            if (header && scrolled < 500) {
+                header.style.transform = `translateY(${scrolled * 0.3}px)`;
             }
+        });
+
+        // 添加鼠标移动效果
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.feature-card');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            cards.forEach((card, index) => {
+                const offsetX = (x - 0.5) * 10 * (index + 1);
+                const offsetY = (y - 0.5) * 10 * (index + 1);
+                card.style.transform = `translateX(${offsetX}px) translateY(${offsetY}px)`;
+            });
         });
     </script>
 </body>
