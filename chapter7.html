@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七章可视化平台 - 3D图表与动画</title>
+    <link rel="stylesheet" href="chapter7.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #FFF5F5 0%, #F8BBD0 25%, #FFDAB9 50%, #FFCCDD 75%, #FFF0F5 100%);
+            min-height: 100vh;
+            color: #8B4513;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, rgba(255,182,193,0.3) 0%, rgba(255,192,203,0.2) 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(255,105,180,0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #C71585;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(199,21,133,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #DB7093;
+            opacity: 0.8;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .module {
+            background: rgba(255,255,255,0.85);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(219,112,147,0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(219,112,147,0.2);
+        }
+
+        .module h2 {
+            color: #C71585;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        .control-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            min-width: 100px;
+            font-weight: 500;
+            color: #8B4513;
+        }
+
+        .control-group select,
+        .control-group input[type="range"],
+        .control-group input[type="number"] {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #FFB6C1;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.8);
+        }
+
+        .control-group button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .control-group button:hover {
+            background: linear-gradient(135deg, #FF1493, #C71585);
+            transform: scale(1.05);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.5);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,182,193,0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255,105,180,0.2);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #C71585;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #8B4513;
+            margin-top: 5px;
+        }
+
+        .animation-canvas {
+            width: 100%;
+            height: 200px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .star {
+            position: absolute;
+            color: #FFD700;
+            font-size: 20px;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        @keyframes rotate3d {
+            0% { transform: rotateY(0deg) rotateX(0deg); }
+            100% { transform: rotateY(360deg) rotateX(360deg); }
+        }
+
+        .rotating-container {
+            animation: rotate3d 10s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        .code-example {
+            background: rgba(255,255,255,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #8B4513;
+            margin: 15px 0;
+            border-left: 4px solid #FF69B4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .modules {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .module {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌸 第七章可视化平台</h1>
+            <p class="subtitle">3D图表、动画与统计地图的交互式学习网站</p>
+        </header>
+
+        <div class="modules">
+            <!-- 模块1: mplot3d绘制3D图表 -->
+            <div class="module">
+                <h2>🌟 7.1 mplot3d绘制3D图表</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>图表类型:</label>
+                        <select id="chartType">
+                            <option value="scatter">3D散点图</option>
+                            <option value="surface">3D曲面图</option>
+                            <option value="wireframe">3D网格图</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>星点数量:</label>
+                        <input type="range" id="starCount" min="50" max="500" value="200">
+                        <span id="starCountValue">200</span>
+                    </div>
+                    <div class="control-group">
+                        <label>旋转速度:</label>
+                        <input type="range" id="rotationSpeed" min="1" max="10" value="5">
+                        <span id="rotationSpeedValue">5</span>
+                    </div>
+                    <div class="control-group">
+                        <button onclick="generate3DChart()">重新生成</button>
+                        <button onclick="toggleRotation()">切换旋转</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart3d"></canvas>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="totalStars">200</div>
+                        <div class="stat-label">星点总数</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="avgHeight">0.5</div>
+                        <div class="stat-label">平均高度</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="rotationAngle">0°</div>
+                        <div class="stat-label">旋转角度</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块2: animation制作动图 -->
+            <div class="module">
+                <h2>✨ 7.2 animation制作动图</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>动画类型:</label>
+                        <select id="animationType">
+                            <option value="twinkle">闪烁星星</option>
+                            <option value="sine">正弦波</option>
+                            <option value="spiral">螺旋动画</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>动画速度:</label>
+                        <input type="range" id="animSpeed" min="1" max="10" value="5">
+                        <span id="animSpeedValue">5</span>
+                    </div>
+                    <div class="control-group">
+                        <label>粒子数量:</label>
+                        <input type="range" id="particleCount" min="10" max="100" value="30">
+                        <span id="particleCountValue">30</span>
+                    </div>
+                    <div class="control-group">
+                        <button onclick="playAnimation()">播放</button>
+                        <button onclick="pauseAnimation()">暂停</button>
+                        <button onclick="resetAnimation()">重置</button>
+                    </div>
+                </div>
+                <div class="animation-canvas" id="animationCanvas"></div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="frameCount">0</div>
+                        <div class="stat-label">帧数</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="animStatus">停止</div>
+                        <div class="stat-label">状态</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="particleNum">30</div>
+                        <div class="stat-label">粒子数</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块3: basemap绘制统计地图 -->
+            <div class="module">
+                <h2>🗺️ 7.3 basemap绘制统计地图</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>地图类型:</label>
+                        <select id="mapType">
+                            <option value="bubble">气泡地图</option>
+                            <option value="heatmap">热力地图</option>
+                            <option value="choropleth">分级统计图</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>数据集:</label>
+                        <select id="dataSet">
+                            <option value="population">人口分布</option>
+                            <option value="gdp">经济数据</option>
+                            <option value="temperature">温度数据</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>气泡大小:</label>
+                        <input type="range" id="bubbleSize" min="1" max="20" value="8">
+                        <span id="bubbleSizeValue">8</span>
+                    </div>
+                    <div class="control-group">
+                        <button onclick="updateMap()">更新地图</button>
+                        <button onclick="randomizeData()">随机数据</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="mapChart"></canvas>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="dataPoints">50</div>
+                        <div class="stat-label">数据点</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="maxValue">1000</div>
+                        <div class="stat-label">最大值</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="avgValue">500</div>
+                        <div class="stat-label">平均值</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module">
+            <h2>📚 学习资源</h2>
+            <div class="code-example">
+                <strong>3D图表示例代码：</strong><br>
+                import matplotlib.pyplot as plt<br>
+                from mpl_toolkits.mplot3d import Axes3D<br>
+                fig = plt.figure()<br>
+                ax = fig.add_subplot(111, projection='3d')<br>
+                ax.scatter(x, y, z, c='r', marker='o')
+            </div>
+            <div class="code-example">
+                <strong>动画示例代码：</strong><br>
+                from matplotlib.animation import FuncAnimation<br>
+                def animate(i):<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return line.set_data(x[i:], y[i:])<br>
+                anim = FuncAnimation(fig, animate, frames=100)
+            </div>
+            <div class="code-example">
+                <strong>地图示例代码：</strong><br>
+                from mpl_toolkits.basemap import Basemap<br>
+                m = Basemap(projection='mill', llcrnrlat=-90, urcrnrlat=90)<br>
+                m.drawcoastlines()
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化变量
+        let rotationInterval;
+        let animationInterval;
+        let isRotating = false;
+        let isAnimating = false;
+        let currentRotation = 0;
+        let frameCounter = 0;
+
+        // 3D散点图数据生成
+        function generate3DData(count) {
+            const data = {
+                x: [],
+                y: [],
+                z: []
+            };
+            
+            for (let i = 0; i < count; i++) {
+                data.x.push((Math.random() - 0.5) * 10);
+                data.y.push((Math.random() - 0.5) * 10);
+                data.z.push(Math.random() * 10);
+            }
+            
+            return data;
+        }
+
+        // 生成3D图表
+        function generate3DChart() {
+            const canvas = document.getElementById('chart3d');
+            const ctx = canvas.getContext('2d');
+            const starCount = document.getElementById('starCount').value;
+            
+            const data = generate3DData(parseInt(starCount));
+            
+            // 清除旧图表
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 创建简单的3D效果散点图
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let i = 0; i < data.x.length; i++) {
+                const x = centerX + data.x[i] * 20;
+                const y = centerY - data.z[i] * 20;
+                const size = 2 + data.y[i] * 0.5;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, 2 * Math.PI);
+                ctx.fillStyle = `hsla(${330 + data.z[i] * 10}, 70%, 60%, ${0.6 + data.z[i] * 0.04})`;
+                ctx.fill();
+            }
+            
+            // 更新统计信息
+            document.getElementById('totalStars').textContent = starCount;
+            document.getElementById('avgHeight').textContent = (data.z.reduce((a, b) => a + b, 0) / data.z.length).toFixed(2);
+        }
+
+        // 切换旋转
+        function toggleRotation() {
+            if (isRotating) {
+                clearInterval(rotationInterval);
+                isRotating = false;
+            } else {
+                const speed = 11 - document.getElementById('rotationSpeed').value;
+                rotationInterval = setInterval(() => {
+                    currentRotation += 2;
+                    document.getElementById('rotationAngle').textContent = currentRotation % 360 + '°';
+                    generate3DChart();
+                }, speed * 100);
+                isRotating = true;
+            }
+        }
+
+        // 创建星星动画
+        function createStars() {
+            const canvas = document.getElementById('animationCanvas');
+            canvas.innerHTML = '';
+            
+            const count = document.getElementById('particleCount').value;
+            const animType = document.getElementById('animationType').value;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.innerHTML = '✨';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                
+                if (animType === 'spiral') {
+                    star.style.animation = `twinkle ${2 + Math.random() * 3}s infinite, rotate3d ${5 + Math.random() * 5}s linear infinite`;
+                }
+                
+                canvas.appendChild(star);
+            }
+        }
+
+        // 播放动画
+        function playAnimation() {
+            if (!isAnimating) {
+                isAnimating = true;
+                document.getElementById('animStatus').textContent = '播放中';
+                
+                animationInterval = setInterval(() => {
+                    frameCounter++;
+                    document.getElementById('frameCount').textContent = frameCounter;
+                    
+                    const speed = document.getElementById('animSpeed').value;
+                    const animType = document.getElementById('animationType').value;
+                    
+                    if (animType === 'sine' && frameCounter % 10 === 0) {
+                        const stars = document.querySelectorAll('.star');
+                        stars.forEach((star, index) => {
+                            const offset = Math.sin((frameCounter + index * 10) * 0.1) * 20;
+                            star.style.transform = `translateY(${offset}px)`;
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // 暂停动画
+        function pauseAnimation() {
+            clearInterval(animationInterval);
+            isAnimating = false;
+            document.getElementById('animStatus').textContent = '暂停';
+        }
+
+        // 重置动画
+        function resetAnimation() {
+            pauseAnimation();
+            frameCounter = 0;
+            document.getElementById('frameCount').textContent = '0';
+            createStars();
+        }
+
+        // 更新地图
+        function updateMap() {
+            const canvas = document.getElementById('mapChart');
+            const ctx = canvas.getContext('2d');
+            const mapType = document.getElementById('mapType').value;
+            const dataSet = document.getElementById('dataSet').value;
+            const bubbleSize = document.getElementById('bubbleSize').value;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制简单的世界地图背景
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 生成随机数据点
+            const dataPoints = [];
+            for (let i = 0; i < 50; i++) {
+                dataPoints.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    value: Math.random() * 1000,
+                    label: `城市${i + 1}`
+                });
+            }
+            
+            // 根据地图类型绘制
+            if (mapType === 'bubble') {
+                dataPoints.forEach(point => {
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, Math.sqrt(point.value) * bubbleSize / 100, 0, 2 * Math.PI);
+                    ctx.fillStyle = `hsla(${330 - point.value * 0.3}, 70%, 60%, 0.6)`;
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 105, 180, 0.8)';
+                    ctx.stroke();
+                });
+            } else if (mapType === 'heatmap') {
+                dataPoints.forEach(point => {
+                    const gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, 30);
+                    gradient.addColorStop(0, `hsla(${330 - point.value * 0.3}, 70%, 60%, 0.8)`);
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(point.x - 30, point.y - 30, 60, 60);
+                });
+            }
+            
+            // 更新统计信息
+            const values = dataPoints.map(p => p.value);
+            document.getElementById('dataPoints').textContent = dataPoints.length;
+            document.getElementById('maxValue').textContent = Math.max(...values).toFixed(0);
+            document.getElementById('avgValue').textContent = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(0);
+        }
+
+        // 随机化数据
+        function randomizeData() {
+            updateMap();
+        }
+
+        // 事件监听器
+        document.getElementById('starCount').addEventListener('input', function() {
+            document.getElementById('starCountValue').textContent = this.value;
+            generate3DChart();
+        });
+
+        document.getElementById('rotationSpeed').addEventListener('input', function() {
+            document.getElementById('rotationSpeedValue').textContent = this.value;
+            if (isRotating) {
+                clearInterval(rotationInterval);
+                toggleRotation();
+                toggleRotation();
+            }
+        });
+
+        document.getElementById('animSpeed').addEventListener('input', function() {
+            document.getElementById('animSpeedValue').textContent = this.value;
+        });
+
+        document.getElementById('particleCount').addEventListener('input', function() {
+            document.getElementById('particleCountValue').textContent = this.value;
+            createStars();
+        });
+
+        document.getElementById('bubbleSize').addEventListener('input', function() {
+            document.getElementById('bubbleSizeValue').textContent = this.value;
+            updateMap();
+        });
+
+        // 页面加载时初始化
+        window.onload = function() {
+            generate3DChart();
+            createStars();
+            updateMap();
+        };
+    </script>
+</body>
+</html>
