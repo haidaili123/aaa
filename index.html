@@ -3,947 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第五章交互式数据可视化</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>数据可视化学习平台</title>
     <style>
-        /* 交互控件样式 */
-        .controls-panel {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px var(--shadow-warm);
-            border: 1px solid var(--border-warm);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .control-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            align-items: center;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            line-height: 1.6;
+            padding: 20px;
         }
-        
-        .control-group label {
-            font-weight: 500;
-            color: var(--text-primary);
-            min-width: 80px;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
         }
-        
-        select, input[type="range"], input[type="color"], button {
-            padding: 0.5rem;
-            border: 1px solid var(--border-warm);
-            border-radius: 5px;
-            background: var(--pale-warm);
-            color: var(--text-primary);
+
+        header {
+            margin-bottom: 50px;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .chapter-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
         }
-        
-        select:hover, input:hover {
-            border-color: var(--primary-warm);
+
+        .chapter-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
-        
-        button {
-            background: var(--primary-warm);
+
+        .chapter-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .chapter-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .chapter-theme {
+            font-size: 1em;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .chapter-link {
+            display: inline-block;
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
             color: white;
             font-weight: 500;
-            cursor: pointer;
-            min-width: 100px;
-        }
-        
-        button:hover {
-            background: var(--secondary-warm);
-            transform: translateY(-1px);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .data-display {
-            background: var(--pale-warm);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-        
-        .chart-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border-warm);
-        }
-        
-        .tab-button {
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
             transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
         }
-        
-        .tab-button.active {
-            color: var(--primary-warm);
-            border-bottom-color: var(--primary-warm);
-            background: var(--pale-warm);
+
+        .chapter-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
         }
-        
-        .tab-content {
-            display: none;
+
+        .chapter-6 {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         }
-        
-        .tab-content.active {
-            display: block;
+
+        .chapter-7 {
+            background: linear-gradient(135deg, rgba(233, 30, 99, 0.2), rgba(255, 182, 193, 0.2));
         }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 4px 15px var(--shadow-warm);
-            border: 1px solid var(--border-warm);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-warm);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-        
-        .filter-section {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary-warm);
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .chapters-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>第五章交互式数据可视化</h1>
-        <p>低饱和暖米黄色主题 - 支持数据筛选、动态更新和交互操作</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>📊 数据可视化学习平台</h1>
+            <p class="subtitle">基于《Python数据可视化之美》的交互式学习网站</p>
+        </header>
 
-    <nav>
-        <ul>
-            <li><a href="#sales-section">销售数据分析</a></li>
-            <li><a href="#demographics-section">人口统计分析</a></li>
-            <li><a href="#weather-section">气象数据展示</a></li>
-            <li><a href="#comparison-section">对比分析</a></li>
-        </ul>
-    </nav>
+        <main>
+            <div class="chapters-grid">
+                <div class="chapter-card chapter-6">
+                    <div class="chapter-number">06</div>
+                    <div class="chapter-title">坐标轴定制</div>
+                    <div class="chapter-theme">淡紫色渐变主题</div>
+                    <p>坐标轴位置、刻度样式、轴脊控制等高级定制功能</p>
+                    <br>
+                    <a href="chapter6-simple.html" class="chapter-link">开始学习</a>
+                </div>
 
-    <main>
-        <!-- 统计概览 -->
-        <section id="overview">
-            <h2>数据概览</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalSales">¥26,900</div>
-                    <div class="stat-label">总销售额</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="avgGrowth">67.8×</div>
-                    <div class="stat-label">平均增长倍数</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalPrecipitation">575.9</div>
-                    <div class="stat-label">年降水量(mm)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="carSold">358,455</div>
-                    <div class="stat-label">汽车总销量(辆)</div>
+                <div class="chapter-card chapter-7">
+                    <div class="chapter-number">07</div>
+                    <div class="chapter-title">3D图表与动画</div>
+                    <div class="chapter-theme">豆沙粉主题</div>
+                    <p>3D数据可视化、动画制作与统计地图技术</p>
+                    <br>
+                    <a href="chapter7.html" class="chapter-link">开始学习</a>
                 </div>
             </div>
-        </section>
-
-        <!-- 销售数据交互分析 -->
-        <section id="sales-section">
-            <h2>销售数据分析</h2>
-            
-            <div class="controls-panel">
-                <h3>交互控件</h3>
-                <div class="control-group">
-                    <label>数据类型:</label>
-                    <select id="dataType">
-                        <option value="both">产品A + 产品B</option>
-                        <option value="productA">仅产品A</option>
-                        <option value="productB">仅产品B</option>
-                    </select>
-                    
-                    <label>图表类型:</label>
-                    <select id="chartType">
-                        <option value="line">折线图</option>
-                        <option value="bar">柱状图</option>
-                        <option value="radar">雷达图</option>
-                    </select>
-                    
-                    <label>动画速度:</label>
-                    <input type="range" id="animationSpeed" min="0" max="3000" value="1000">
-                    <span id="speedValue">1000ms</span>
-                </div>
-                
-                <div class="control-group">
-                    <button onclick="updateSalesChart()">更新图表</button>
-                    <button onclick="exportSalesData()">导出数据</button>
-                    <button onclick="randomizeData()">随机数据</button>
-                </div>
-            </div>
-
-            <div class="example-card">
-                <h3>产品销售趋势</h3>
-                <div class="chart-container">
-                    <canvas id="interactiveSalesChart"></canvas>
-                </div>
-                <div class="data-display" id="salesDataDisplay">
-                    当前显示: 产品A + 产品B | 折线图
-                </div>
-            </div>
-        </section>
-
-        <!-- 人口统计分析 -->
-        <section id="demographics-section">
-            <h2>人口统计分析</h2>
-            
-            <div class="filter-section">
-                <h3>国家筛选</h3>
-                <div class="checkbox-group" id="countryFilters">
-                    <!-- 动态生成 -->
-                </div>
-            </div>
-
-            <div class="example-card">
-                <div class="chart-tabs">
-                    <button class="tab-button active" onclick="switchTab('pets')">宠物统计</button>
-                    <button class="tab-button" onclick="switchTab('douyin')">抖音用户</button>
-                </div>
-                
-                <div class="tab-content active" id="pets-tab">
-                    <div class="charts-grid">
-                        <div class="chart-container">
-                            <canvas id="interactiveCatChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="interactiveDogChart"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="petComparisonChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="tab-content" id="douyin-tab">
-                    <div class="douyin-grid">
-                        <div class="chart-container large">
-                            <canvas id="interactiveDouyinGrowth"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="interactiveDouyin2017"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="interactiveDouyin2018"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 气象数据展示 -->
-        <section id="weather-section">
-            <h2>气象数据展示</h2>
-            
-            <div class="controls-panel">
-                <div class="control-group">
-                    <label>显示月份:</label>
-                    <select id="monthRange">
-                        <option value="all">全年</option>
-                        <option value="q1">第一季度</option>
-                        <option value="q2">第二季度</option>
-                        <option value="q3">第三季度</option>
-                        <option value="q4">第四季度</option>
-                    </select>
-                    
-                    <label>数据叠加:</label>
-                    <input type="checkbox" id="showTemp" checked> 气温
-                    <input type="checkbox" id="showPrecip" checked> 降水量
-                    <input type="checkbox" id="showEvap" checked> 蒸发量
-                </div>
-            </div>
-
-            <div class="example-card">
-                <h3>气候数据可视化</h3>
-                <div class="chart-container">
-                    <canvas id="interactiveWeatherChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- 对比分析 -->
-        <section id="comparison-section">
-            <h2>对比分析</h2>
-            
-            <div class="controls-panel">
-                <div class="control-group">
-                    <label>对比模式:</label>
-                    <select id="comparisonMode">
-                        <option value="product">产品对比</option>
-                        <option value="city">城市对比</option>
-                        <option value="year">年度对比</option>
-                    </select>
-                    <button onclick="updateComparison()">更新对比</button>
-                </div>
-            </div>
-
-            <div class="example-card">
-                <h3>数据对比分析</h3>
-                <div class="chart-container">
-                    <canvas id="comparisonChart"></canvas>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>交互式数据可视化网站 - 第五章内容展示</p>
-    </footer>
-
-    <script>
-        // 全局变量和配置
-        const warmColors = {
-            primary: '#D4A574',
-            secondary: '#C19A6B', 
-            light: '#E6D5B8',
-            pale: '#F5F0E8',
-            accent: '#B8956A',
-            contrast1: '#8B7355',
-            contrast2: '#A0826D'
-        };
-
-        let salesChart, catChart, dogChart, petComparisonChart, weatherChart, comparisonChart;
-        let douyinGrowthChart, douyin2017Chart, douyin2018Chart;
-        
-        const countries = ['中国', '加拿大', '巴西', '澳大利亚', '日本', '墨西哥', '俄罗斯', '韩国', '瑞士', '土耳其', '英国', '美国'];
-        const catData = [19, 33, 28, 29, 14, 24, 57, 6, 26, 15, 27, 39];
-        const dogData = [25, 33, 58, 39, 15, 64, 29, 23, 22, 11, 27, 50];
-        
-        const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-        const productA = [20, 28, 23, 16, 29, 36, 39, 33, 31, 19, 21, 25];
-        const productB = [17, 22, 39, 26, 35, 23, 25, 27, 29, 38, 28, 20];
-
-        // 缺失的函数实现
-        function updateProductComparison() {
-            const ctx = comparisonChart.getContext('2d');
-            comparisonChart.data.labels = months;
-            comparisonChart.data.datasets = [{
-                label: '产品A vs 产品B',
-                data: productA,
-                backgroundColor: warmColors.primary
-            }, {
-                label: '产品B',
-                data: productB,
-                backgroundColor: warmColors.secondary
-            }];
-            comparisonChart.update();
-        }
-
-        function updateCityComparison() {
-            const cities = ['北京', '上海', '广州', '深圳', '浙江', '山东'];
-            const carSales = [83775, 62860, 59176, 64205, 48671, 39968];
-            
-            comparisonChart.data.labels = cities;
-            comparisonChart.data.datasets = [{
-                label: '汽车销量',
-                data: carSales,
-                backgroundColor: warmColors.primary
-            }];
-            comparisonChart.update();
-        }
-
-        function updateYearComparison() {
-            const years = ['2019', '2020', '2021', '2022', '2023'];
-            const growthData = [100, 120, 145, 178, 210];
-            
-            comparisonChart.data.labels = years;
-            comparisonChart.data.datasets = [{
-                label: '增长趋势',
-                data: growthData,
-                backgroundColor: warmColors.secondary
-            }];
-            comparisonChart.update();
-        }
-
-        // 初始化
-        window.addEventListener('load', function() {
-            initializeCountryFilters();
-            initializeSalesChart();
-            initializeDemographicsCharts();
-            initializeWeatherChart();
-            initializeComparisonChart();
-            updateStatistics();
-            setupEventListeners();
-        });
-
-        // 设置事件监听器
-        function setupEventListeners() {
-            document.getElementById('animationSpeed').addEventListener('input', function(e) {
-                document.getElementById('speedValue').textContent = e.target.value + 'ms';
-            });
-            
-            document.getElementById('monthRange').addEventListener('change', updateWeatherChart);
-            document.getElementById('showTemp').addEventListener('change', updateWeatherChart);
-            document.getElementById('showPrecip').addEventListener('change', updateWeatherChart);
-            document.getElementById('showEvap').addEventListener('change', updateWeatherChart);
-        }
-
-        // 初始化国家筛选器
-        function initializeCountryFilters() {
-            const container = document.getElementById('countryFilters');
-            countries.forEach((country, index) => {
-                const item = document.createElement('div');
-                item.className = 'checkbox-item';
-                item.innerHTML = `
-                    <input type="checkbox" id="country-${index}" value="${index}" checked>
-                    <label for="country-${index}">${country}</label>
-                `;
-                container.appendChild(item);
-            });
-            
-            container.addEventListener('change', updateDemographicsCharts);
-        }
-
-        // 初始化销售图表
-        function initializeSalesChart() {
-            const ctx = document.getElementById('interactiveSalesChart').getContext('2d');
-            
-            salesChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: '产品A',
-                        data: [...productA],
-                        borderColor: warmColors.primary,
-                        backgroundColor: 'rgba(212, 165, 116, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointHoverRadius: 8
-                    }, {
-                        label: '产品B',
-                        data: [...productB],
-                        borderColor: warmColors.secondary,
-                        backgroundColor: 'rgba(193, 154, 107, 0.1)',
-                        tension: 0.3,
-                        pointRadius: 5,
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: {
-                        duration: 1000
-                    },
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '产品销售趋势分析'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ¥' + context.parsed.y + '亿';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '销售额(亿元)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 更新销售图表
-        function updateSalesChart() {
-            const dataType = document.getElementById('dataType').value;
-            const chartType = document.getElementById('chartType').value;
-            const animationSpeed = parseInt(document.getElementById('animationSpeed').value);
-            
-            let datasets = [];
-            let dataDisplay = '当前显示: ';
-            
-            if (dataType === 'both' || dataType === 'productA') {
-                datasets.push({
-                    label: '产品A',
-                    data: [...productA],
-                    borderColor: warmColors.primary,
-                    backgroundColor: chartType === 'line' ? 'rgba(212, 165, 116, 0.1)' : warmColors.primary,
-                    tension: 0.3,
-                    pointRadius: 5,
-                    fill: chartType === 'radar'
-                });
-                dataDisplay += '产品A ';
-            }
-            
-            if (dataType === 'both' || dataType === 'productB') {
-                datasets.push({
-                    label: '产品B',
-                    data: [...productB],
-                    borderColor: warmColors.secondary,
-                    backgroundColor: chartType === 'line' ? 'rgba(193, 154, 107, 0.1)' : warmColors.secondary,
-                    tension: 0.3,
-                    pointRadius: 5,
-                    fill: chartType === 'radar'
-                });
-                dataDisplay += '产品B ';
-            }
-            
-            dataDisplay += `| ${chartType === 'line' ? '折线图' : chartType === 'bar' ? '柱状图' : '雷达图'}`;
-            
-            salesChart.config.type = chartType;
-            salesChart.data.datasets = datasets;
-            salesChart.options.animation.duration = animationSpeed;
-            salesChart.update();
-            
-            document.getElementById('salesDataDisplay').textContent = dataDisplay;
-        }
-
-        // 初始化人口统计图表
-        function initializeDemographicsCharts() {
-            // 养猫图表
-            const catCtx = document.getElementById('interactiveCatChart').getContext('2d');
-            catChart = new Chart(catCtx, {
-                type: 'bar',
-                data: {
-                    labels: countries,
-                    datasets: [{
-                        label: '养猫人群比例',
-                        data: [...catData],
-                        backgroundColor: warmColors.primary
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    indexAxis: 'y',
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '养猫人群比例'
-                        }
-                    }
-                }
-            });
-
-            // 养狗图表
-            const dogCtx = document.getElementById('interactiveDogChart').getContext('2d');
-            dogChart = new Chart(dogCtx, {
-                type: 'bar',
-                data: {
-                    labels: countries,
-                    datasets: [{
-                        label: '养狗人群比例',
-                        data: [...dogData],
-                        backgroundColor: warmColors.secondary
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    indexAxis: 'y',
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '养狗人群比例'
-                        }
-                    }
-                }
-            });
-
-            // 对比图表
-            const comparisonCtx = document.getElementById('petComparisonChart').getContext('2d');
-            petComparisonChart = new Chart(comparisonCtx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: '宠物分布',
-                        data: countries.map((country, i) => ({
-                            x: catData[i],
-                            y: dogData[i]
-                        })),
-                        backgroundColor: warmColors.accent,
-                        pointRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '养猫vs养狗关系图'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: '养猫比例(%)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: '养狗比例(%)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 更新人口统计图表
-        function updateDemographicsCharts() {
-            const checkboxes = document.querySelectorAll('#countryFilters input[type="checkbox"]:checked');
-            const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.value));
-            
-            const filteredCountries = selectedIndices.map(i => countries[i]);
-            const filteredCatData = selectedIndices.map(i => catData[i]);
-            const filteredDogData = selectedIndices.map(i => dogData[i]);
-            
-            catChart.data.labels = filteredCountries;
-            catChart.data.datasets[0].data = filteredCatData;
-            catChart.update();
-            
-            dogChart.data.labels = filteredCountries;
-            dogChart.data.datasets[0].data = filteredDogData;
-            dogChart.update();
-            
-            petComparisonChart.data.datasets[0].data = selectedIndices.map(i => ({
-                x: catData[i],
-                y: dogData[i]
-            }));
-            petComparisonChart.update();
-        }
-
-        // 初始化天气图表
-        function initializeWeatherChart() {
-            const ctx = document.getElementById('interactiveWeatherChart').getContext('2d');
-            const temperature = [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 33.4, 23.0, 16.5, 12.0, 6.2];
-            const precipitation = [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3];
-            const evaporation = [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3];
-            
-            weatherChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        {
-                            label: '蒸发量',
-                            data: [...evaporation],
-                            backgroundColor: 'rgba(212, 165, 116, 0.8)',
-                            borderColor: warmColors.accent,
-                            borderWidth: 1
-                        },
-                        {
-                            label: '降水量',
-                            data: [...precipitation],
-                            backgroundColor: 'rgba(193, 154, 107, 0.8)',
-                            borderColor: warmColors.contrast1,
-                            borderWidth: 1
-                        },
-                        {
-                            label: '平均气温',
-                            data: [...temperature],
-                            type: 'line',
-                            borderColor: warmColors.contrast2,
-                            backgroundColor: 'rgba(160, 130, 109, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 5,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '气候数据可视化'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: '水量 (ml)'
-                            },
-                            stacked: true
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: '气温(°C)'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 更新天气图表
-        function updateWeatherChart() {
-            const monthRange = document.getElementById('monthRange').value;
-            const showTemp = document.getElementById('showTemp').checked;
-            const showPrecip = document.getElementById('showPrecip').checked;
-            const showEvap = document.getElementById('showEvap').checked;
-            
-            let monthIndices = [];
-            let monthLabels = [];
-            
-            switch(monthRange) {
-                case 'q1':
-                    monthIndices = [0, 1, 2];
-                    monthLabels = ['1月', '2月', '3月'];
-                    break;
-                case 'q2':
-                    monthIndices = [3, 4, 5];
-                    monthLabels = ['4月', '5月', '6月'];
-                    break;
-                case 'q3':
-                    monthIndices = [6, 7, 8];
-                    monthLabels = ['7月', '8月', '9月'];
-                    break;
-                case 'q4':
-                    monthIndices = [9, 10, 11];
-                    monthLabels = ['10月', '11月', '12月'];
-                    break;
-                default:
-                    monthIndices = Array.from({length: 12}, (_, i) => i);
-                    monthLabels = months;
-            }
-            
-            const temperature = [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 33.4, 23.0, 16.5, 12.0, 6.2];
-            const precipitation = [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3];
-            const evaporation = [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3];
-            
-            let datasets = [];
-            
-            if (showEvap) {
-                datasets.push({
-                    label: '蒸发量',
-                    data: monthIndices.map(i => evaporation[i]),
-                    backgroundColor: 'rgba(212, 165, 116, 0.8)',
-                    borderColor: warmColors.accent,
-                    borderWidth: 1
-                });
-            }
-            
-            if (showPrecip) {
-                datasets.push({
-                    label: '降水量',
-                    data: monthIndices.map(i => precipitation[i]),
-                    backgroundColor: 'rgba(193, 154, 107, 0.8)',
-                    borderColor: warmColors.contrast1,
-                    borderWidth: 1
-                });
-            }
-            
-            if (showTemp) {
-                datasets.push({
-                    label: '平均气温',
-                    data: monthIndices.map(i => temperature[i]),
-                    type: 'line',
-                    borderColor: warmColors.contrast2,
-                    backgroundColor: 'rgba(160, 130, 109, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    yAxisID: 'y1'
-                });
-            }
-            
-            weatherChart.data.labels = monthLabels;
-            weatherChart.data.datasets = datasets;
-            weatherChart.update();
-        }
-
-        // 初始化对比图表
-        function initializeComparisonChart() {
-            const ctx = document.getElementById('comparisonChart').getContext('2d');
-            const cities = ['北京', '上海', '广州', '深圳', '浙江', '山东'];
-            const carSales = [83775, 62860, 59176, 64205, 48671, 39968];
-            
-            comparisonChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: cities,
-                    datasets: [{
-                        label: '汽车销量',
-                        data: [...carSales],
-                        backgroundColor: warmColors.primary,
-                        borderColor: warmColors.accent,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '城市汽车销量对比'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '销量(辆)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 更新对比图表
-        function updateComparison() {
-            const mode = document.getElementById('comparisonMode').value;
-            
-            switch(mode) {
-                case 'product':
-                    updateProductComparison();
-                    break;
-                case 'city':
-                    updateCityComparison();
-                    break;
-                case 'year':
-                    updateYearComparison();
-                    break;
-            }
-        }
-
-        // 标签页切换
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
-        }
-
-        // 更新统计数据
-        function updateStatistics() {
-            const totalSales = productA.reduce((a, b) => a + b, 0) + productB.reduce((a, b) => a + b, 0);
-            const avgGrowth = [51, 73, 99, 132, 45].reduce((a, b) => a + b, 0) / 5;
-            const totalPrecip = [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3].reduce((a, b) => a + b, 0);
-            const carSold = [83775, 62860, 59176, 64205, 48671, 39968].reduce((a, b) => a + b, 0);
-            
-            document.getElementById('totalSales').textContent = '¥' + totalSales.toLocaleString();
-            document.getElementById('avgGrowth').textContent = avgGrowth.toFixed(1) + '×';
-            document.getElementById('totalPrecipitation').textContent = totalPrecip.toFixed(1);
-            document.getElementById('carSold').textContent = carSold.toLocaleString();
-        }
-
-        // 导出数据
-        function exportSalesData() {
-            const data = {
-                months: months,
-                productA: productA,
-                productB: productB
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'sales_data.json';
-            a.click();
-        }
-
-        // 随机数据生成
-        function randomizeData() {
-            const newProductA = productA.map(() => Math.floor(Math.random() * 40) + 10);
-            const newProductB = productB.map(() => Math.floor(Math.random() * 40) + 10);
-            
-            salesChart.data.datasets[0].data = newProductA;
-            if (salesChart.data.datasets[1]) {
-                salesChart.data.datasets[1].data = newProductB;
-            }
-            salesChart.update();
-            
-            updateStatistics();
-        }
-
-        // 平滑滚动
-        document.querySelectorAll('nav a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    </script>
+        </main>
+    </div>
 </body>
 </html>
